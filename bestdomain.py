@@ -32,18 +32,29 @@ def get_huawei_record_id(client):
         
         
 def delete_all_record_sets(client, zone_id):
+    records = []
+    offset = 0
+    limit = 100
     while True:
-        request = ListRecordSetsWithLineRequest()
-        response = client.list_record_sets_with_line(request)
-        response_obj = response.to_json_object()
-        record = response_obj["id"]
-        if not record_sets:
-            break
-        for record in record_sets:
-            request_delete = DeleteRecordSetRequest(zone_name_or_id=zone_id, recordset_id=record.id)
-            client.delete_record_set(request_delete)
-            print(f"Deleted record set with ID: {record.id}")
+        request = ListRecordSetsRequest(offset=offset, limit=limit)
+        response = client.list_record_sets(request)
+        # 尝试不同的方式获取记录集列表
+        if hasattr(response, 'recordsets'):
+            new_records = response.recordsets
+        elif hasattr(response, 'get_record_sets'):
+            new_records = response.get_record_sets()
+        else:
+            raise AttributeError("Could not find record sets in response object.")
 
+        if not new_records:
+            break
+        records.extend(new_records)
+        offset += limit
+
+    for record in records:
+        if record.zone_id == zone_id:
+            request_delete = client.delete_record_set(zone_id=zone_id, recordset_id=record.id)
+            print(f"Deleted record set with ID: {record.id}")
 
             
             
