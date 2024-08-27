@@ -37,6 +37,11 @@ def delete_existing_dns_records(client, zone_id, recordset_id):
     request.body = BatchDeleteRecordSetWithLineRequestBody(recordset_ids=listRecordsetIdsbody)
     response = client.batch_delete_record_set_with_line(request)
     print(response)
+    except exceptions.ClientRequestException as e:
+        print(e.status_code)
+        print(e.request_id)
+        print(e.error_code)
+        print(e.error_msg)
 
 def update_huawei_dns(ip_list, client, zone_id, recordset_id, subdomain, domain):
     record_name = domain if subdomain == '@' else f'{subdomain}.{domain}'
