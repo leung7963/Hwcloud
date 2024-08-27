@@ -43,10 +43,6 @@ def delete_all_record_sets(client, zone_id):
             client.delete_record_set(request_delete)
             print(f"Deleted record set with ID: {record.id}")
 
-    try:
-    delete_all_record_sets(client, zone_id)
-    except Exception as e:
-    print(f"Error: {e}")
 
 def update_huawei_dns(ip_list, client, zone_id, recordset_id, subdomain, domain):
     record_name = domain if subdomain == '@' else f'{subdomain}.{domain}'
