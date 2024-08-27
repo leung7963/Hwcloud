@@ -12,7 +12,7 @@ from huaweicloudsdkdns.v2.region.dns_region import DnsRegion
 import json
 
 ACCESSID = os.environ["HUAWEI_ACCESS_KEY"]
-SECRETKEY = os.environ["HUAWEI_ACCESS_KEY"]
+SECRETKEY = os.environ["HUAWEI_SECRET_KEY"]
 
 class HuaWeiApi():
     def __init__(self, ACCESSID, SECRETKEY, REGION = 'ap-southeast-1'):
