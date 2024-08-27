@@ -5,7 +5,7 @@ from huaweicloudsdkdns.v2.region.dns_region import DnsRegion
 from huaweicloudsdkcore.exceptions import exceptions
 from huaweicloudsdkdns.v2 import *
 
-domain = leung0108.us.kg
+domain = 'leung0108.us.kg'
 def get_ip_list(url):
     response = requests.get(url)
     response.raise_for_status()
