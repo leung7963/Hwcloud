@@ -31,7 +31,7 @@ def get_huawei_record_id(client):
         raise Exception("No zones found")
         
         
-def delete_existing_dns_records(client, zone_id, recordset_id):
+def delete_existing_dns_records(client):
     try:
         request = BatchDeleteRecordSetWithLineRequest()
         listRecordsetIdsbody = recordset_id
