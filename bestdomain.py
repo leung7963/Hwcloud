@@ -4,8 +4,9 @@ from huaweicloudsdkcore.auth.credentials import BasicCredentials
 from huaweicloudsdkdns.v2.region.dns_region import DnsRegion
 from huaweicloudsdkcore.exceptions import exceptions
 from huaweicloudsdkdns.v2 import *
-zone_id = 'ff808082915709880191909e06b005cb'
-domain = 'leung0108.us.kg'
+
+
+
 def get_ip_list(url):
     response = requests.get(url)
     response.raise_for_status()
@@ -53,7 +54,7 @@ def delete_all_record_sets(client, zone_id):
 
     for record in records:
         if record.zone_id == zone_id:
-            request_delete = client.delete_record_set()
+            request_delete = client.delete_record_set(zone_id=zone_id, recordset_id=record.id)
             print(f"Deleted record set with ID: {record.id}")
 
             
@@ -83,8 +84,13 @@ if __name__ == "__main__":
     sk = os.getenv('HUAWEI_SECRET_KEY')
     credentials = BasicCredentials(ak, sk)
     client = DnsClient.new_builder().with_credentials(credentials).with_region(DnsRegion.value_of("ap-southeast-1")).build()
+    zone_id = 'ff808082915709880191909e06b005cb'
+    domain = 'leung0108.us.kg'
+    
+    
     
     # 示例 URL 和子域名对应的 IP 列表
+
     subdomain_ip_mapping = {
         'proxyip': 'https://raw.githubusercontent.com/leung7963/iptest/main/proxyip.txt',
         # 添加更多子域名和对应的 IP 列表 URL
