@@ -4,13 +4,17 @@
 # Reference1: https://github.com/huaweicloud/huaweicloud-sdk-python-v3/tree/ff7df92d2a496871c7c2d84dfd2a7f4e2467fff5/huaweicloud-sdk-dns/huaweicloudsdkdns/v2/model 
 # Reference2: https://support.huaweicloud.com/api-dns/dns_api_65003.html
 # REGION: https://developer.huaweicloud.com/endpoint
-
+import random
+import time
+import json
+import requests
+import os
+import traceback
 from re import sub
 from huaweicloudsdkcore.auth.credentials import BasicCredentials
 from huaweicloudsdkdns.v2 import *
 from huaweicloudsdkdns.v2.region.dns_region import DnsRegion
 import json
-import os
 
 ACCESSID = os.environ["HUAWEI_ACCESS_KEY"]
 SECRETKEY = os.environ["HUAWEI_SECRET_KEY"]
