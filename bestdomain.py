@@ -1,9 +1,9 @@
 import requests
 import os
 from huaweicloudsdkcore.auth.credentials import BasicCredentials
-from huaweicloudsdkdns.v2 import DnsClient
 from huaweicloudsdkdns.v2.region.dns_region import DnsRegion
-from huaweicloudsdkdns.v2 import ListRecordSetsWithTagsRequest, DeleteRecordSetRequest
+from huaweicloudsdkcore.exceptions import exceptions
+from huaweicloudsdkdns.v2 import *
 zone_id = 'ff808082915709880191909e06b005cb'
 domain = 'leung0108.us.kg'
 def get_ip_list(url):
