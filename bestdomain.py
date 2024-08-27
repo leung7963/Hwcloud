@@ -33,13 +33,13 @@ def get_huawei_record_id(client):
         
 def delete_all_record_sets(client, zone_id):
     while True:
-        request = DeleteRecordSetsRequest()
-        response = client.DeleteRecordSetsRequest(request)
-        request.recordset_id = record
-        if not records:
+        request = ListRecordSetsWithLineRequest(zone_name_or_id=zone_id)
+        response = client.list_record_sets_with_line(request, region=DnsRegion.value_of("cn-north-1"))
+        record_sets = response.record_sets
+        if not record_sets:
             break
-        for record in records:
-            request_delete = DeleteRecordSetRequest(zone_id=zone_id, recordset_id=record.id)
+        for record in record_sets:
+            request_delete = DeleteRecordSetRequest(zone_name_or_id=zone_id, recordset_id=record.id)
             client.delete_record_set(request_delete)
             print(f"Deleted record set with ID: {record.id}")
 
