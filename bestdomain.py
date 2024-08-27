@@ -36,8 +36,8 @@ def delete_all_record_sets(client, zone_id):
     offset = 0
     limit = 100
     while True:
-        # 使用 list_record_sets 方法并传入参数来获取记录集列表
-        response = client.list_record_sets(zone_id=zone_id, offset=offset, limit=limit)
+        request = ListRecordSetsRequest(offset=offset, limit=limit)
+        response = client.list_record_sets(request)
         new_records = response.record_sets
         if not new_records:
             break
@@ -45,9 +45,11 @@ def delete_all_record_sets(client, zone_id):
         offset += limit
 
     for record in records:
-        request_delete = client.delete_record_set(zone_id=zone_id, recordset_id=record.id)
-        print(f"Deleted record set with ID: {record.id}")
-
+        if record.zone_id == zone_id:
+            request_delete = client.delete_record_set(zone_id=zone_id, recordset_id=record.id)
+            print(f"Deleted record set with ID: {record.id}")
+            
+            
 def update_huawei_dns(ip_list, client, zone_id, recordset_id, subdomain, domain):
     record_name = domain if subdomain == '@' else f'{subdomain}.{domain}'
     for ip in ip_list:
