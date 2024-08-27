@@ -33,9 +33,9 @@ def get_huawei_record_id(client):
         
 def delete_all_record_sets(client, zone_id):
     while True:
-        request = ShowRecordSetByZoneRequest(zone_id=zone_id)
-        response = client.show_record_set_by_zone(request)
-        records = response.id
+        request = DeleteRecordSetsRequest()
+        response = client.DeleteRecordSetsRequest(request)
+        request.recordset_id = record
         if not records:
             break
         for record in records:
