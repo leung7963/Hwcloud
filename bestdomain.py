@@ -1,6 +1,8 @@
 import os
 from huaweicloudsdkcore.auth.credentials import BasicCredentials
-from huaweicloudsdkdns.v2 import DnsClient, ListRecordSetsRequest, DeleteRecordSetRequest, CreateRecordSetRequest
+from huaweicloudsdkdns.v2.region.dns_region import DnsRegion
+from huaweicloudsdkcore.exceptions import exceptions
+from huaweicloudsdkdns.v2 import *
 
 def get_ip_list(url):
     response = requests.get(url)
