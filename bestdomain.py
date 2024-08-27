@@ -83,7 +83,7 @@ if __name__ == "__main__":
     try:
         # 获取华为云域区 ID 和域名
         zone_id = get_huawei_zone_id(client)
-        recordset_id = get_huawei_record_id(client)
+       # recordset_id = get_huawei_record_id(client)
         
         for subdomain, url in subdomain_ip_mapping.items():
             # 获取 IP 列表
