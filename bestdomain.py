@@ -33,7 +33,7 @@ def get_huawei_record_id(client):
         
 def delete_all_record_sets(client, zone_id):
     while True:
-        request = ListRecordSetsWithTagsRequest(zone_name_or_id=zone_id)
+        request = ListRecordSetsWithLineRequest(zone_name_or_id=zone_id)
         response = client.list_record_sets_with_tags(request, region=DnsRegion.value_of("ap-southeast-1"))
         record_sets = response.record_sets
         if not record_sets:
