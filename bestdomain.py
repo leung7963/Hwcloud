@@ -34,7 +34,7 @@ def get_huawei_record_id(client):
 def delete_existing_dns_records(client):
     try:
         request = BatchDeleteRecordSetWithLineRequest()
-        listRecordsetIdsbody = recordset_id
+        listRecordsetIdsbody = zone_id
         request.body = BatchDeleteRecordSetWithLineRequestBody(recordset_ids=listRecordsetIdsbody)
         response = client.batch_delete_record_set_with_line(request)
         print(response)
