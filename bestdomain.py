@@ -1,113 +1,115 @@
-import requests
-import os
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+# Author/Mail: tongdongdong@outlook.com
+# Reference1: https://github.com/huaweicloud/huaweicloud-sdk-python-v3/tree/ff7df92d2a496871c7c2d84dfd2a7f4e2467fff5/huaweicloud-sdk-dns/huaweicloudsdkdns/v2/model 
+# Reference2: https://support.huaweicloud.com/api-dns/dns_api_65003.html
+# REGION: https://developer.huaweicloud.com/endpoint
+
+from re import sub
 from huaweicloudsdkcore.auth.credentials import BasicCredentials
-from huaweicloudsdkdns.v2.region.dns_region import DnsRegion
-from huaweicloudsdkcore.exceptions import exceptions
 from huaweicloudsdkdns.v2 import *
+from huaweicloudsdkdns.v2.region.dns_region import DnsRegion
+import json
 
 
+class HuaWeiApi():
+    def __init__(self, ACCESSID, SECRETKEY, REGION = 'cn-east-3'):
+        self.AK = ACCESSID
+        self.SK = SECRETKEY
+        self.region = REGION
+        self.client = DnsClient.new_builder().with_credentials(BasicCredentials(self.AK, self.SK)).with_region(DnsRegion.value_of(self.region)).build()
+        self.zone_id = self.get_zones()
 
-def get_ip_list(url):
-    response = requests.get(url)
-    response.raise_for_status()
-    return response.text.strip().split('\n')
+    def del_record(self, domain, record):
+        request = DeleteRecordSetsRequest()
+        request.zone_id = self.zone_id[domain + '.']
+        request.recordset_id = record
+        response = self.client.delete_record_sets(request)
+        result = json.loads(str(response))
+        print(result)
+        return result
 
-#def get_huawei_zone_id(client):
-    # 根据实际情况调整查询条件获取域名的 zone_id
-#    request = ListPublicZonesRequest()
-#    response = client.list_public_zones(request)
-    # 假设这里第一个结果的 zone_id 就是要找的，实际情况可能需要更复杂的逻辑
-#    if response.zones:
-#        return response.zones[0].id
-    #else:
-        #raise Exception("No zones found")
-def get_huawei_record_id(client):
-    # 根据实际情况调整查询条件获取域名的 zone_id
-    request = ShowRecordSetByZoneRequest(zone_id=zone_id)
-    response = client.show_record_set_by_zone(request)
-    # 假设这里第一个结果的 zone_id 就是要找的，实际情况可能需要更复杂的逻辑
-    if response.recordsets:
-        return response.recordsets[0].id
-    else:
-        raise Exception("No zones found")
-        
-        
-def delete_all_record_sets(client, zone_id):
-    records = []
-    offset = 0
-    limit = 100
-    while True:
-        request = ListRecordSetsRequest(offset=offset, limit=limit)
-        response = client.list_record_sets(request)
-        # 尝试不同的方式获取记录集列表
-        if hasattr(response, 'recordsets'):
-            new_records = response.recordsets
-        elif hasattr(response, 'get_record_sets'):
-            new_records = response.get_record_sets()
+    def get_record(self, domain, length, sub_domain, record_type):
+        request = ListRecordSetsWithLineRequest()
+        request.limit = length
+        request.type = record_type
+        if sub_domain == '@':
+            request.name = domain + "."
         else:
-            raise AttributeError("Could not find record sets in response object.")
+            request.name = sub_domain + '.' + domain + "."
+        response = self.client.list_record_sets_with_line(request)
+        data = json.loads(str(response))
+        result = {}
+        records_temp = []
+        for record in data['recordsets']:
+            if (sub_domain == '@' and domain + "." == record['name']) or (sub_domain + '.' + domain + "." == record['name']):
+                record['line'] = self.line_format(record['line'])
+                record['value'] = '1.1.1.1'
+                records_temp.append(record)
+        result['data'] = {'records': records_temp}
+        return result
 
-        if not new_records:
-            break
-        records.extend(new_records)
-        offset += limit
-
-    for record in records:
-        if record.zone_id == zone_id:
-            request_delete = client.delete_record_set(zone_id=zone_id, recordset_id=record.id)
-            print(f"Deleted record set with ID: {record.id}")
-
-            
-            
-def update_huawei_dns(ip_list, client, zone_id, recordset_id, subdomain, domain):
-    record_name = domain if subdomain == '@' else f'{subdomain}.{domain}'
-    for ip in ip_list:
-        request = CreateRecordSetRequest(
-            zone_id=zone_id,
-            body={
-                "name": record_name,
-                "description": "",
-                "type": "A",
-                "ttl": 60,
-                "records": [ip]
-            }
+    def create_record(self, domain, sub_domain, value, record_type, line, ttl):
+        request = CreateRecordSetWithLineRequest()
+        request.zone_id = self.zone_id[domain + '.']
+        if sub_domain == '@':
+            name = domain + "."
+        else:
+            name = sub_domain + '.' + domain + "."
+        request.body = CreateRecordSetWithLineReq(
+            type = record_type,
+            name = name,
+            ttl = ttl,
+            weight = 1,
+            records = [value],
+            line = self.line_format(line)
         )
-        response = client.create_record_set(request)
-        if response.status_code == 200:
-            print(f"Add {subdomain}:{ip}")
+        response = self.client.create_record_set_with_line(request)
+        result = json.loads(str(response))
+        return result
+        
+    def change_record(self, domain, record_id, sub_domain, value, record_type, line, ttl):
+        request = UpdateRecordSetRequest()
+        request.zone_id = self.zone_id[domain + '.']
+        request.recordset_id = record_id
+        if sub_domain == '@':
+            name = domain + "."
         else:
-            print(f"Failed to add A record for IP {ip} to subdomain {subdomain}: {response.status_code} {response.text}")
+            name = sub_domain + '.' + domain + "."
+        request.body = UpdateRecordSetReq(
+            name = name,
+            type = record_type,
+            ttl = ttl,
+            records=[value]
+        )
+        response = self.client.update_record_set(request)
+        result = json.loads(str(response))
+        return result
 
-if __name__ == "__main__":
-    # 华为云认证信息设置
-    ak = os.getenv('HUAWEI_ACCESS_KEY')
-    sk = os.getenv('HUAWEI_SECRET_KEY')
-    credentials = BasicCredentials(ak, sk)
-    client = DnsClient.new_builder().with_credentials(credentials).with_region(DnsRegion.value_of("ap-southeast-1")).build()
-    zone_id = 'ff808082915709880191909e06b005cb'
-    domain = 'leung0108.us.kg'
-    
-    
-    
-    # 示例 URL 和子域名对应的 IP 列表
+    def get_zones(self):
+        request = ListPublicZonesRequest()
+        response = self.client.list_public_zones(request)
+        result = json.loads(str(response))
+        zone_id = {}
+        for zone in result['zones']:
+            zone_id[zone['name']] = zone['id'] 
+        return zone_id
 
-    subdomain_ip_mapping = {
-        'proxyip': 'https://raw.githubusercontent.com/leung7963/iptest/main/proxyip.txt',
-        # 添加更多子域名和对应的 IP 列表 URL
-    }
-    
-    try:
-        # 获取华为云域区 ID 和域名
-        
-       # recordset_id = get_huawei_record_id(client)
-        
-        for subdomain, url in subdomain_ip_mapping.items():
-            # 获取 IP 列表
-            ip_list = get_ip_list(url)
-            # 删除现有的 DNS 记录
-            delete_all_record_sets(client, zone_id)
-            # 更新华为云 DNS 记录
-            update_huawei_dns(ip_list, client, zone_id, subdomain, domain)
-            
-    except Exception as e:
-        print(f"Error: {e}")
+    def line_format(self, line):
+        lines = {
+            '默认' : 'default_view',
+            '电信' : 'Dianxin',
+            '联通' : 'Liantong',
+            '移动' : 'Yidong',
+            '境外' : 'Abroad',
+            'default_view' : '默认',
+            'Dianxin' : '电信',
+            'Liantong' : '联通',
+            'Yidong' : '移动',
+            'Abroad' : '境外',
+        }
+        return lines.get(line, None)
+
+if __name__ == '__main__':
+    hw_api = HuaWeiApi('WTTCWxxxxxxxxx84O0V', 'GXkG6D4X1Nxxxxxxxxxxxxxxxxxxxxx4lRg6lT')
+    print(hw_api.get_record('xxxx.com', 100, '@', 'A'))
