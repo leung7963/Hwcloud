@@ -5,7 +5,7 @@ from huaweicloudsdkcore.exceptions import exceptions
 from huaweicloudsdkdns.v2 import *
 
 def get_ip_list(url):
-    response = requests.get(url)
+    response = request.get(url)
     response.raise_for_status()
     return response.text.strip().split('\n')
 
