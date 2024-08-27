@@ -35,7 +35,8 @@ def delete_all_record_sets(client, zone_id):
     while True:
         request = ListRecordSetsWithLineRequest()
         response = client.list_record_sets_with_line(request)
-        record_sets = response.record_sets
+        response_obj = response.to_json_object()
+        record_sets = response_obj["id"]
         if not record_sets:
             break
         for record in record_sets:
