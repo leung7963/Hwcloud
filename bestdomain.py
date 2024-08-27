@@ -53,7 +53,7 @@ def delete_all_record_sets(client, zone_id):
 
     for record in records:
         if record.zone_id == zone_id:
-            request_delete = client.delete_record_set(recordset_id=record.id)
+            request_delete = client.delete_record_set()
             print(f"Deleted record set with ID: {record.id}")
 
             
