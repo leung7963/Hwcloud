@@ -85,7 +85,7 @@ if __name__ == "__main__":
             # 获取 IP 列表
             ip_list = get_ip_list(url)
             # 删除现有的 DNS 记录
-            delete_existing_dns_records(client, zone_id, subdomain, domain)
+            delete_all_record_sets(client, zone_id)
             # 更新华为云 DNS 记录
             update_huawei_dns(ip_list, client, zone_id, subdomain, domain)
             
