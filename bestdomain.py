@@ -11,7 +11,7 @@ def get_ip_list(url):
 
 def get_huawei_zone_id(client):
     # 根据实际情况调整查询条件获取域名的 zone_id
-    request = ListRecordSetsRequest()
+    request = ListPublicZonesRequest()
     response = client.list_record_sets(request)
     # 假设这里第一个结果的 zone_id 就是要找的，实际情况可能需要更复杂的逻辑
     if response.record_sets:
