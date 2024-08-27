@@ -13,7 +13,7 @@ import json
 
 
 class HuaWeiApi():
-    def __init__(self, ACCESSID, SECRETKEY, REGION = 'cn-east-3'):
+    def __init__(self, ACCESSID, SECRETKEY, REGION = 'ap-southeast-1'):
         self.AK = ACCESSID
         self.SK = SECRETKEY
         self.region = REGION
