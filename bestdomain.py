@@ -32,17 +32,8 @@ def get_huawei_record_id(client):
         
         
 def delete_existing_dns_records(client, zone_id, recordset_id, subdomain, domain):
-    record_name = domain if subdomain == '@' else f'{subdomain}.{domain}'
-    while True:
-        request = ListRecordSetsRequest(zone_id=zone_id, name=record_name)
-        response = client.list_record_sets(request)
-        records = response.record_sets
-        if not records:
-            break
-        for record in records:
-            request_delete = DeleteRecordSetRequest(zone_id=zone_id, recordset_id=record.id)
-            client.delete_record_set(request_delete)
-            print(f"Del {subdomain}:{record.id}")
+    request = BatchDeleteRecordSetWithLineRequest()
+    listRecordsetIdsbody = ['{recordset_id}']
 
 def update_huawei_dns(ip_list, client, zone_id, recordset_id, subdomain, domain):
     record_name = domain if subdomain == '@' else f'{subdomain}.{domain}'
