@@ -29,5 +29,7 @@ jobs:
     - name: Run update script
       env:
         CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+        HUAWEI_SECRET_KEY: ${{ secrets.HUAWEI_SECRET_KEY }}
+        HUAWEI_ACCESS_KEY: ${{ secrets.HUAWEI_ACCESS_KEY }}
       run: |
         python bestdomain.py
