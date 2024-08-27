@@ -54,7 +54,7 @@ if __name__ == "__main__":
     ak = os.getenv('HUAWEI_ACCESS_KEY')
     sk = os.getenv('HUAWEI_SECRET_KEY')
     credentials = BasicCredentials(ak, sk)
-    client = DnsClient.new_builder().with_credentials(credentials).with_region(DnsRegion.value_of("ap-southeast-1")).build()
+    client = DnsClient.new_builder().with_credentials(credentials).with_region(ap-southeast-1).build()
     
     # 示例 URL 和子域名对应的 IP 列表
     subdomain_ip_mapping = {
