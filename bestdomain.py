@@ -16,8 +16,8 @@ from huaweicloudsdkcore.auth.credentials import BasicCredentials
 from huaweicloudsdkdns.v2 import *
 from huaweicloudsdkdns.v2.region.dns_region import DnsRegion
 
-ACCESSID = os.environ["HUAWEI_ACCESS_KEY"]
-SECRETKEY = os.environ["HUAWEI_SECRET_KEY"]
+AK = os.environ["HUAWEI_ACCESS_KEY"]
+SK = os.environ["HUAWEI_SECRET_KEY"]
 
 class HuaWeiApi():
     def __init__(self, ACCESSID, SECRETKEY, REGION = 'ap-southeast-1'):
