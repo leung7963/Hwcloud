@@ -35,7 +35,7 @@ def delete_all_record_sets(client, zone_id):
     while True:
         request = ShowRecordSetByZoneRequest(zone_id=zone_id)
         response = client.show_record_set_by_zone(request)
-        records = response.record_sets
+        records = response.id
         if not records:
             break
         for record in records:
