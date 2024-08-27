@@ -10,6 +10,7 @@ import json
 import requests
 import os
 import traceback
+import sys
 from re import sub
 from huaweicloudsdkcore.auth.credentials import BasicCredentials
 from huaweicloudsdkdns.v2 import *
