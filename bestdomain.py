@@ -32,16 +32,21 @@ def get_huawei_record_id(client):
         
         
 def delete_all_record_sets(client, zone_id):
+    records = []
+    offset = 0
+    limit = 100
     while True:
-        request = ListRecordSetsWithLineRequest(zone_name_or_id=zone_id)
-        response = client.list_record_sets_with_line(request, region=DnsRegion.value_of("ap-southeast-1"))
-        record_sets = response.record_sets
-        if not record_sets:
+        # 使用 list_record_sets 方法并传入参数来获取记录集列表
+        response = client.list_record_sets(zone_id=zone_id, offset=offset, limit=limit)
+        new_records = response.record_sets
+        if not new_records:
             break
-        for record in record_sets:
-            request_delete = DeleteRecordSetRequest(zone_name_or_id=zone_id, recordset_id=record.id)
-            client.delete_record_set(request_delete)
-            print(f"Deleted record set with ID: {record.id}")
+        records.extend(new_records)
+        offset += limit
+
+    for record in records:
+        request_delete = client.delete_record_set(zone_id=zone_id, recordset_id=record.id)
+        print(f"Deleted record set with ID: {record.id}")
 
 def update_huawei_dns(ip_list, client, zone_id, recordset_id, subdomain, domain):
     record_name = domain if subdomain == '@' else f'{subdomain}.{domain}'
