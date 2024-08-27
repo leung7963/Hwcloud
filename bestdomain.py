@@ -31,18 +31,22 @@ def get_huawei_record_id(client):
         raise Exception("No zones found")
         
         
-def delete_existing_dns_records(client):
+def delete_all_record_sets(client, zone_id):
+    while True:
+        request = ListRecordSetsRequest(zone_id=zone_id)
+        response = client.list_record_sets(request)
+        records = response.record_sets
+        if not records:
+            break
+        for record in records:
+            request_delete = DeleteRecordSetRequest(zone_id=zone_id, recordset_id=record.id)
+            client.delete_record_set(request_delete)
+            print(f"Deleted record set with ID: {record.id}")
+
     try:
-        request = BatchDeleteRecordSetWithLineRequest()
-        listRecordsetIdsbody = zone_id
-        request.body = BatchDeleteRecordSetWithLineRequestBody(recordset_ids=listRecordsetIdsbody)
-        response = client.batch_delete_record_set_with_line(request)
-        print(response)
-    except exceptions.ClientRequestException as e:
-        print(e.status_code)
-        print(e.request_id)
-        print(e.error_code)
-        print(e.error_msg)
+    delete_all_record_sets(client, zone_id)
+    except Exception as e:
+    print(f"Error: {e}")
 
 def update_huawei_dns(ip_list, client, zone_id, recordset_id, subdomain, domain):
     record_name = domain if subdomain == '@' else f'{subdomain}.{domain}'
