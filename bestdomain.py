@@ -73,7 +73,7 @@ else:
                     "type": "A",
                     "ttl": 300,
                     "records": [ip]
-                    "weight": 1
+                    "weight": "1"
                 }
             )
             response = client.create_record_set(create_record_set_request)
