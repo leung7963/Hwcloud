@@ -29,49 +29,53 @@ client = DnsClient.new_builder() \
     .with_http_config(config) \
     .build()
 
-# 删除域名下所有可删除的DNS记录
-try:
-    list_record_sets_request = ListRecordSetsRequest()
-    list_record_sets_request.zone_id = zone_id
-    record_sets = client.list_record_sets(list_record_sets_request).recordsets
-
-    for record_set in record_sets:
-        if record_set.status != "ACTIVE" or record_set.name == "@." + domain_name or record_set.name == "www." + domain_name:
-            # 跳过不可删除的记录集
-            print(f"跳过默认记录集: {record_set.name}")
-            continue
-
-        delete_record_set_request = DeleteRecordSetRequest(
-            zone_id=zone_id, 
-            recordset_id=record_set.id
-        )
-        client.delete_record_set(delete_record_set_request)
-        print(f"已删除记录集: {record_set.name}")
-except exceptions.ClientRequestException as e:
-    print(f"删除DNS记录时出现错误: {e.status_code} - {e.error_msg}")
-
 # 从URL获取IP地址
 try:
     response = requests.get('https://raw.githubusercontent.com/leung7963/iptest/main/proxyip.txt')
     ip_list = response.text.splitlines()
-    print("已获取IP地址列表。")
+    print(f"已获取IP地址列表: {ip_list}")
 except requests.RequestException as e:
     print(f"获取IP地址时出现错误: {str(e)}")
     ip_list = []
 
-# 创建新的DNS记录
-try:
-    for ip in ip_list:
-        create_record_set_request = CreateRecordSetRequest(
-            zone_id=zone_id,
-            body={
-                "name": domain_name,
-                "type": "A",
-                "ttl": 300,
-                "records": [ip]
-            }
-        )
-        response = client.create_record_set(create_record_set_request)
-        print(f"已创建新的DNS记录: {ip}")
-except exceptions.ClientRequestException as e:
-    print(f"创建DNS记录时出现错误: {e.status_code} - {e.error_msg}")
+# 检查是否获取到IP地址
+if not ip_list:
+    print("未获取到任何IP地址，程序终止。")
+else:
+    # 删除域名下所有可删除的DNS记录
+    try:
+        list_record_sets_request = ListRecordSetsRequest()
+        list_record_sets_request.zone_id = zone_id
+        record_sets = client.list_record_sets(list_record_sets_request).recordsets
+
+        for record_set in record_sets:
+            if record_set.status != "ACTIVE" or record_set.name == "@." + domain_name or record_set.name == "www." + domain_name:
+                # 跳过不可删除的记录集
+                print(f"跳过默认记录集: {record_set.name}")
+                continue
+
+            delete_record_set_request = DeleteRecordSetRequest(
+                zone_id=zone_id, 
+                recordset_id=record_set.id
+            )
+            client.delete_record_set(delete_record_set_request)
+            print(f"已删除记录集: {record_set.name}")
+    except exceptions.ClientRequestException as e:
+        print(f"删除DNS记录时出现错误: {e.status_code} - {e.error_msg}")
+
+    # 创建新的DNS记录
+    try:
+        for ip in ip_list:
+            create_record_set_request = CreateRecordSetRequest(
+                zone_id=zone_id,
+                body={
+                    "name": domain_name,
+                    "type": "A",
+                    "ttl": 300,
+                    "records": [ip]
+                }
+            )
+            response = client.create_record_set(create_record_set_request)
+            print(f"已为IP地址 {ip} 创建新的DNS记录。")
+    except exceptions.ClientRequestException as e:
+        print(f"创建DNS记录时出现错误: {e.status_code} - {e.error_msg}")
