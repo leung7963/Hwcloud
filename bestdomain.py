@@ -1,9 +1,10 @@
 import os
 import requests
-from huaweicloudsdkdns.v2 import *
 from huaweicloudsdkcore.auth.credentials import BasicCredentials
 from huaweicloudsdkcore.exceptions import exceptions
 from huaweicloudsdkcore.http.http_config import HttpConfig
+from huaweicloudsdkcore.region.region import Region
+from huaweicloudsdkdns.v2 import *
 from huaweicloudsdkcore.client import Client
 
 # 设置华为云的AK和SK
