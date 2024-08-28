@@ -59,18 +59,19 @@ except requests.RequestException as e:
     print(f"获取IP地址时出现错误: {str(e)}")
     ip_list = []
 
-# 创建DNS记录
+# 创建新的DNS记录
 try:
-    create_record_set_request = CreateRecordSetRequest(
-        zone_id=zone_id,
-        body={
-            "name": domain_name,
-            "type": "A",
-            "ttl": 300,
-            "records": ["127.0.0.1"]  # 你从URL获取的IP地址
-        }
-    )
-    response = client.create_record_set(create_record_set_request)
-    print("已创建新的DNS记录。")
+    for ip in ip_list:
+        create_record_set_request = CreateRecordSetRequest(
+            zone_id=zone_id,
+            body={
+                "name": domain_name,
+                "type": "A",
+                "ttl": 300,
+                "records": [ip]
+            }
+        )
+        response = client.create_record_set(create_record_set_request)
+        print(f"已创建新的DNS记录: {ip}")
 except exceptions.ClientRequestException as e:
     print(f"创建DNS记录时出现错误: {e.status_code} - {e.error_msg}")
