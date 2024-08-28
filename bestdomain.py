@@ -13,11 +13,17 @@ project_id = 'c339558c4a1f4b9c850e52933ae5012f'
 zone_id = 'ff808082915709880191909e06b005cb'  # DNS Zone ID
 domain_name = 'proxyip.leung0108.us.kg'  # 你要操作的域名
 
+
+# 设置区域，例如：华北-北京四（cn-north-4），根据实际情况设置
+region = 'ap-southeast-1'
+
 # 创建客户端
 credentials = BasicCredentials(ak, sk, project_id)
 config = HttpConfig.get_default_config()
+
 client = DnsClient.new_builder() \
     .with_credentials(credentials) \
+    .with_region(Region(region, f"https://dns.{region}.myhuaweicloud.com")) \
     .with_http_config(config) \
     .build()
 
