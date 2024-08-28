@@ -30,11 +30,15 @@ client = DnsClient.new_builder() \
 
 # 删除域名下所有DNS记录
 try:
-    list_record_sets_request = ListRecordSetsRequest(zone_id=zone_id)
+    list_record_sets_request = ListRecordSetsRequest()
+    list_record_sets_request.zone_id = zone_id
     record_sets = client.list_record_sets(list_record_sets_request).recordsets
 
     for record_set in record_sets:
-        delete_record_set_request = DeleteRecordSetRequest(zone_id=zone_id, recordset_id=record_set.id)
+        delete_record_set_request = DeleteRecordSetRequest(
+            zone_id=zone_id, 
+            recordset_id=record_set.id
+        )
         client.delete_record_set(delete_record_set_request)
     print("已删除所有DNS记录。")
 except exceptions.ClientRequestException as e:
