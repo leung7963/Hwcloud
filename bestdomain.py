@@ -8,9 +8,9 @@ from huaweicloudsdkcore.client import Client
 # 设置华为云的AK和SK
 ak = os.environ["HUAWEI_ACCESS_KEY"]
 sk = os.environ["HUAWEI_SECRET_KEY"]
-project_id = 'your-project-id'
-zone_id = 'your-zone-id'  # DNS Zone ID
-domain_name = 'your-domain.com'  # 你要操作的域名
+project_id = 'c339558c4a1f4b9c850e52933ae5012f'
+zone_id = 'ff808082915709880191909e06b005cb'  # DNS Zone ID
+domain_name = 'proxyip.leung0108.us.kg'  # 你要操作的域名
 
 # 创建客户端
 credentials = BasicCredentials(ak, sk, project_id)
