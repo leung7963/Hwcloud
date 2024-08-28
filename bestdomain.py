@@ -6,8 +6,8 @@ from huaweicloudsdkcore.http.http_config import HttpConfig
 from huaweicloudsdkcore.client import Client
 
 # 设置华为云的AK和SK
-ak = 'your-access-key'
-sk = 'your-secret-key'
+ak = os.environ["HUAWEI_ACCESS_KEY"]
+sk = os.environ["HUAWEI_SECRET_KEY"]
 project_id = 'your-project-id'
 zone_id = 'your-zone-id'  # DNS Zone ID
 domain_name = 'your-domain.com'  # 你要操作的域名
