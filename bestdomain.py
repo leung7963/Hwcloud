@@ -1,122 +1,59 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-# Author/Mail: tongdongdong@outlook.com
-# Reference1: https://github.com/huaweicloud/huaweicloud-sdk-python-v3/tree/ff7df92d2a496871c7c2d84dfd2a7f4e2467fff5/huaweicloud-sdk-dns/huaweicloudsdkdns/v2/model 
-# Reference2: https://support.huaweicloud.com/api-dns/dns_api_65003.html
-# REGION: https://developer.huaweicloud.com/endpoint
-import random
-import time
-import json
 import requests
-import os
-import traceback
-import sys
-from re import sub
-from huaweicloudsdkcore.auth.credentials import BasicCredentials
 from huaweicloudsdkdns.v2 import *
-from huaweicloudsdkdns.v2.region.dns_region import DnsRegion
+from huaweicloudsdkcore.auth.credentials import BasicCredentials
+from huaweicloudsdkcore.exceptions import exceptions
+from huaweicloudsdkcore.http.http_config import HttpConfig
+from huaweicloudsdkcore.client import Client
 
-AK = os.environ["HUAWEI_ACCESS_KEY"]
-SK = os.environ["HUAWEI_SECRET_KEY"]
+# 设置华为云的AK和SK
+ak = 'your-access-key'
+sk = 'your-secret-key'
+project_id = 'your-project-id'
+zone_id = 'your-zone-id'  # DNS Zone ID
+domain_name = 'your-domain.com'  # 你要操作的域名
 
-class HuaWeiApi():
-    def __init__(self, ACCESSID, SECRETKEY, REGION = 'ap-southeast-1'):
-        self.AK = ACCESSID
-        self.SK = SECRETKEY
-        self.region = REGION
-        self.client = DnsClient.new_builder().with_credentials(BasicCredentials(self.AK, self.SK)).with_region(DnsRegion.value_of(self.region)).build()
-        self.zone_id = self.get_zones()
+# 创建客户端
+credentials = BasicCredentials(ak, sk, project_id)
+config = HttpConfig.get_default_config()
+client = DnsClient.new_builder() \
+    .with_credentials(credentials) \
+    .with_http_config(config) \
+    .build()
 
-    def del_record(self, domain, record):
-        request = DeleteRecordSetsRequest()
-        request.zone_id = self.zone_id[domain + '.']
-        request.recordset_id = record
-        response = self.client.delete_record_sets(request)
-        result = json.loads(str(response))
-        print(result)
-        return result
+# 删除域名下所有DNS记录
+try:
+    list_record_sets_request = ListRecordSetsRequest(zone_id=zone_id)
+    record_sets = client.list_record_sets(list_record_sets_request).recordsets
 
-    def get_record(self, domain, length, sub_domain, record_type):
-        request = ListRecordSetsWithLineRequest()
-        request.limit = length
-        request.type = record_type
-        if sub_domain == '@':
-            request.name = domain + "."
-        else:
-            request.name = sub_domain + '.' + domain + "."
-        response = self.client.list_record_sets_with_line(request)
-        data = json.loads(str(response))
-        result = {}
-        records_temp = []
-        for record in data['recordsets']:
-            if (sub_domain == '@' and domain + "." == record['name']) or (sub_domain + '.' + domain + "." == record['name']):
-                record['line'] = self.line_format(record['line'])
-                record['value'] = '1.1.1.1'
-                records_temp.append(record)
-        result['data'] = {'records': records_temp}
-        return result
+    for record_set in record_sets:
+        delete_record_set_request = DeleteRecordSetRequest(zone_id=zone_id, recordset_id=record_set.id)
+        client.delete_record_set(delete_record_set_request)
+    print("已删除所有DNS记录。")
+except exceptions.ClientRequestException as e:
+    print(f"删除DNS记录时出现错误: {e.status_code} - {e.error_msg}")
 
-    def create_record(self, domain, sub_domain, value, record_type, line, ttl):
-        request = CreateRecordSetWithLineRequest()
-        request.zone_id = self.zone_id[domain + '.']
-        if sub_domain == '@':
-            name = domain + "."
-        else:
-            name = sub_domain + '.' + domain + "."
-        request.body = CreateRecordSetWithLineReq(
-            type = record_type,
-            name = name,
-            ttl = ttl,
-            weight = 1,
-            records = [value],
-            line = self.line_format(line)
+# 从URL获取IP地址
+try:
+    response = requests.get('https://raw.githubusercontent.com/leung7963/iptest/main/proxyip.txt')
+    ip_list = response.text.splitlines()
+    print("已获取IP地址列表。")
+except requests.RequestException as e:
+    print(f"获取IP地址时出现错误: {str(e)}")
+    ip_list = []
+
+# 创建新的DNS记录
+try:
+    for ip in ip_list:
+        create_record_set_req = CreateRecordSetRequest(
+            zone_id=zone_id,
+            body=CreateRecordSetReq(
+                name=domain_name,
+                type='A',
+                ttl=300,
+                records=[ip]
+            )
         )
-        response = self.client.create_record_set_with_line(request)
-        result = json.loads(str(response))
-        return result
-        
-    def change_record(self, domain, record_id, sub_domain, value, record_type, line, ttl):
-        request = UpdateRecordSetRequest()
-        request.zone_id = self.zone_id[domain + '.']
-        request.recordset_id = record_id
-        if sub_domain == '@':
-            name = domain + "."
-        else:
-            name = sub_domain + '.' + domain + "."
-        request.body = UpdateRecordSetReq(
-            name = name,
-            type = record_type,
-            ttl = ttl,
-            records=[value]
-        )
-        response = self.client.update_record_set(request)
-        result = json.loads(str(response))
-        return result
-
-    def get_zones(self):
-        request = ListPublicZonesRequest()
-        response = self.client.list_public_zones(request)
-        result = json.loads(str(response))
-        zone_id = {}
-        for zone in result['zones']:
-            zone_id[zone['name']] = zone['id'] 
-        return zone_id
-
-    def line_format(self, line):
-        lines = {
-            '默认' : 'default_view',
-            '电信' : 'Dianxin',
-            '联通' : 'Liantong',
-            '移动' : 'Yidong',
-            '境外' : 'Abroad',
-            'default_view' : '默认',
-            'Dianxin' : '电信',
-            'Liantong' : '联通',
-            'Yidong' : '移动',
-            'Abroad' : '境外',
-        }
-        return lines.get(line, None)
-
-if __name__ == '__main__':
-    hw_api = HuaWeiApi('WTTCWxxxxxxxxx84O0V', 'GXkG6D4X1Nxxxxxxxxxxxxxxxxxxxxx4lRg6lT')
-    print(hw_api.get_record('xxxx.com', 100, '@', 'A'))
+        client.create_record_set(create_record_set_req)
+    print("已创建新的DNS记录。")
+except exceptions.ClientRequestException as e:
+    print(f"创建DNS记录时出现错误: {e.status_code} - {e.error_msg}")
