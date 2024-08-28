@@ -6,7 +6,7 @@ from huaweicloudsdkcore.http.http_config import HttpConfig
 from huaweicloudsdkcore.region.region import Region
 from huaweicloudsdkdns.v2 import *
 from huaweicloudsdkdns.v2.region.dns_region import DnsRegion
-from huaweicloudsdkdns.v2.model.create_record_set_req import CreateRecordSetReq  # 确保导入正确的类
+
 
 # 设置华为云的AK和SK
 ak = os.environ["HUAWEI_ACCESS_KEY"]
