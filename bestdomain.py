@@ -1,3 +1,4 @@
+import os
 import requests
 from huaweicloudsdkdns.v2 import *
 from huaweicloudsdkcore.auth.credentials import BasicCredentials
