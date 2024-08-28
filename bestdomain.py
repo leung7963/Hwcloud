@@ -28,19 +28,24 @@ client = DnsClient.new_builder() \
     .with_http_config(config) \
     .build()
 
-# 删除域名下所有DNS记录
+# 删除域名下所有可删除的DNS记录
 try:
     list_record_sets_request = ListRecordSetsRequest()
     list_record_sets_request.zone_id = zone_id
     record_sets = client.list_record_sets(list_record_sets_request).recordsets
 
     for record_set in record_sets:
+        if record_set.status != "ACTIVE" or record_set.name == "@." + domain_name or record_set.name == "www." + domain_name:
+            # 跳过不可删除的记录集
+            print(f"跳过默认记录集: {record_set.name}")
+            continue
+
         delete_record_set_request = DeleteRecordSetRequest(
             zone_id=zone_id, 
             recordset_id=record_set.id
         )
         client.delete_record_set(delete_record_set_request)
-    print("已删除所有DNS记录。")
+        print(f"已删除记录集: {record_set.name}")
 except exceptions.ClientRequestException as e:
     print(f"删除DNS记录时出现错误: {e.status_code} - {e.error_msg}")
 
