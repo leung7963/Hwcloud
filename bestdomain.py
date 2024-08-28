@@ -72,7 +72,7 @@ else:
                     "name": domain_name,
                     "type": "A",
                     "ttl": 300,
-                    "records": [ip]
+                    "records": [ip],
                     "weight": "1"
                 }
             )
