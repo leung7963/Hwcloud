@@ -32,5 +32,8 @@ jobs:
         CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
         HUAWEI_SECRET_KEY: ${{ secrets.HUAWEI_SECRET_KEY }}
         HUAWEI_ACCESS_KEY: ${{ secrets.HUAWEI_ACCESS_KEY }}
+        PROJECT_ID: ${{ secrets.PROJECT_ID }}
+        ZONE_ID: ${{ secrets.ZONE_ID }}
+        DOMAIN_NAME: ${{ secrets.DOMAIN_NAME }}
       run: |
         python bestdomain.py
