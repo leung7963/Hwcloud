@@ -6,15 +6,14 @@ from huaweicloudsdkcore.http.http_config import HttpConfig
 from huaweicloudsdkcore.region.region import Region
 from huaweicloudsdkdns.v2 import *
 from huaweicloudsdkdns.v2.region.dns_region import DnsRegion
-
+import time
 
 # 设置华为云的AK和SK
 ak = os.environ["HUAWEI_ACCESS_KEY"]
 sk = os.environ["HUAWEI_SECRET_KEY"]
 project_id = os.environ["PROJECT_ID"]
-zone_id =   os.environ["ZONE_ID"] #DNS Zone ID
+zone_id = os.environ["ZONE_ID"]  # DNS Zone ID
 domain_name = os.environ["DOMAIN_NAME"]  # 你要操作的域名
-
 
 # 设置区域，例如：华北-北京四（cn-north-4），根据实际情况设置
 region = 'ap-southeast-1'
@@ -32,6 +31,7 @@ client = DnsClient.new_builder() \
 # 从URL获取IP地址
 try:
     response = requests.get('https://raw.githubusercontent.com/leung7963/iptest/main/proxyip.txt')
+    response.raise_for_status()
     ip_list = response.text.splitlines()
     print(f"已获取IP地址列表: {ip_list}")
 except requests.RequestException as e:
@@ -58,25 +58,41 @@ else:
                 zone_id=zone_id, 
                 recordset_id=record_set.id
             )
-            client.delete_record_set(delete_record_set_request)
-            print(f"已删除记录集: {record_set.name}")
-    except exceptions.ClientRequestException as e:
-        print(f"删除DNS记录时出现错误: {e.status_code} - {e.error_msg}")
+            
+            try:
+                client.delete_record_set(delete_record_set_request)
+                print(f"已删除记录集: {record_set.name}")
+            except exceptions.ClientRequestException as e:
+                if e.status_code == 404:
+                    print(f"记录集 {record_set.name} 不存在，可能已经被删除，跳过。")
+                else:
+                    print(f"删除DNS记录时出现错误: {e.status_code} - {e.error_msg}")
+            # 为避免并发问题，增加一个短暂的延时
+            time.sleep(2)
 
- # 创建新的DNS记录
+    except exceptions.ClientRequestException as e:
+        print(f"获取或删除DNS记录时出现错误: {e.status_code} - {e.error_msg}")
+
+    # 创建新的DNS记录
     try:
         for ip in ip_list:
             create_record_set_request = CreateRecordSetWithLineRequest(
-            zone_id=zone_id,
-            body={
-                "name": domain_name + ".",
-                "type": "A",
-                "ttl": 1,
-                "records": [ip],
-                "weight": "1"
+                zone_id=zone_id,
+                body={
+                    "name": domain_name + ".",
+                    "type": "A",
+                    "ttl": 1,
+                    "records": [ip],
+                    "weight": "1"
                 }
             )
-            response = client.create_record_set_with_line(create_record_set_request)
-            print(f"已创建新的DNS记录: {ip}")
+            try:
+                response = client.create_record_set_with_line(create_record_set_request)
+                print(f"已创建新的DNS记录: {ip}")
+            except exceptions.ClientRequestException as e:
+                print(f"创建DNS记录时出现错误: {e.status_code} - {e.error_msg}")
+            # 为避免并发问题，增加一个短暂的延时
+            time.sleep(2)
+
     except exceptions.ClientRequestException as e:
         print(f"创建DNS记录时出现错误: {e.status_code} - {e.error_msg}")
