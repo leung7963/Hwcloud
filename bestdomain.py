@@ -76,7 +76,7 @@ else:
                 "weight": "1"
                 }
             )
-            response = client.CreateRecordSetWithLineRequest(create_record_set_request)
+            response = client.create_record_set_with_line(create_record_set_request)
             print(f"已创建新的DNS记录: {ip}")
     except exceptions.ClientRequestException as e:
         print(f"创建DNS记录时出现错误: {e.status_code} - {e.error_msg}")
