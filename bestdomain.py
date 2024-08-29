@@ -69,10 +69,11 @@ else:
             create_record_set_request = CreateRecordSetRequest(
             zone_id=zone_id,
             body={
-                "name": domain_name,
+                "name": domain_name + ".",
                 "type": "A",
                 "ttl": 300,
-                "records": [ip]
+                "records": [ip],
+                "weight": "1"
                 }
             )
             response = client.create_record_set(create_record_set_request)
