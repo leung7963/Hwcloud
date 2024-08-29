@@ -66,7 +66,7 @@ else:
     # 创建新的DNS记录
     try:
         for ip in ip_list:
-            create_record_set_request = CreateRecordSetRequest(
+            create_record = CreateRecordRequest(
                 zone_id=zone_id,
                 body={
                     "name": domain_name,
@@ -76,7 +76,7 @@ else:
                     "weight": "1"
                 }
             )
-            response = client.create_record_set(create_record_set_request)
+            response = client.create_record(create_record_request)
             print(f"已为IP地址 {ip} 创建新的DNS记录。")
     except exceptions.ClientRequestException as e:
         print(f"创建DNS记录时出现错误: {e.status_code} - {e.error_msg}")
