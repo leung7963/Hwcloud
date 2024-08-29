@@ -63,20 +63,19 @@ else:
     except exceptions.ClientRequestException as e:
         print(f"删除DNS记录时出现错误: {e.status_code} - {e.error_msg}")
 
-    # 创建新的DNS记录
+ # 创建新的DNS记录
     try:
         for ip in ip_list:
-            create_record = CreateRecordRequest(
-                zone_id=zone_id,
-                body={
-                    "name": domain_name,
-                    "type": "A",
-                    "ttl": 300,
-                    "records": [ip],
-                    "weight": "1"
+            create_record_set_request = CreateRecordSetRequest(
+            zone_id=zone_id,
+            body={
+                "name": domain_name,
+                "type": "A",
+                "ttl": 300,
+                "records": [ip]
                 }
             )
-            response = client.create_record(create_record_request)
-            print(f"已为IP地址 {ip} 创建新的DNS记录。")
+            response = client.create_record_set(create_record_set_request)
+            print(f"已创建新的DNS记录: {ip}")
     except exceptions.ClientRequestException as e:
         print(f"创建DNS记录时出现错误: {e.status_code} - {e.error_msg}")
