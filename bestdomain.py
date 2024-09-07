@@ -64,7 +64,7 @@ else:
                     else:
                         print(f"Error deleting DNS record: {e.status_code} - {e.error_msg}")
                 # Delay to avoid concurrency issues
-                time.sleep(2)
+                time.sleep(1)
             else:
                 print(f"Skipping record: {record_set.name} (type: {record_set.type})")
 
@@ -90,7 +90,7 @@ else:
             except exceptions.ClientRequestException as e:
                 print(f"Error creating DNS record: {e.status_code} - {e.error_msg}")
             # Delay to avoid concurrency issues
-            time.sleep(2)
+            time.sleep(1)
 
     except exceptions.ClientRequestException as e:
         print(f"Error creating DNS records: {e.status_code} - {e.error_msg}")
