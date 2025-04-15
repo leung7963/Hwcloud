@@ -1,6 +1,5 @@
 import os
 import requests
-import random
 from huaweicloudsdkcore.auth.credentials import BasicCredentials
 from huaweicloudsdkcore.exceptions import exceptions
 from huaweicloudsdkcore.http.http_config import HttpConfig
@@ -8,6 +7,7 @@ from huaweicloudsdkcore.region.region import Region
 from huaweicloudsdkdns.v2 import *
 from huaweicloudsdkdns.v2.region.dns_region import DnsRegion
 import time
+import random
 
 # Set Huawei Cloud credentials
 ak = os.environ["HUAWEI_ACCESS_KEY"]
@@ -29,31 +29,25 @@ client = DnsClient.new_builder() \
     .with_http_config(config) \
     .build()
 
-def get_random_ips_from_file(file_path, count=20):
-    """Read IPs from file and return random selection"""
-    try:
-        with open(file_path, 'r') as file:
-            all_ips = [line.strip() for line in file if line.strip()]
-        
-        # Remove duplicates
-        unique_ips = list(set(all_ips))
-        
-        # Select random IPs (up to count or all available if less than count)
-        selected_ips = random.sample(unique_ips, min(count, len(unique_ips)))
-        return selected_ips
-    except Exception as e:
-        print(f"Error reading IP file: {str(e)}")
-        return []
-
-# Get IPs from file (replace 'ip_list.txt' with your file path)
-ip_list = get_random_ips_from_file('ip_list.txt', 20)
+# Fetch IP addresses from the URL
+try:
+    response = requests.get('https://raw.githubusercontent.com/leung7963/CFIPS/main/ip.js')
+    response.raise_for_status()
+    ip_list = response.text.splitlines()
+    print(f"Retrieved {len(ip_list)} IP addresses")
+    
+    # Randomly select 20 IP addresses
+    if len(ip_list) > 20:
+        ip_list = random.sample(ip_list, 20)
+    print(f"Selected {len(ip_list)} random IP addresses: {ip_list}")
+except requests.RequestException as e:
+    print(f"Error fetching IP addresses: {str(e)}")
+    ip_list = []
 
 # Check if any IP addresses were retrieved
 if not ip_list:
-    print("No valid IP addresses found, exiting program.")
+    print("No IP addresses found, exiting program.")
 else:
-    print(f"Selected {len(ip_list)} random IP addresses: {ip_list}")
-    
     # Delete only 'A' records matching the DOMAIN_NAME
     try:
         list_record_sets_request = ListRecordSetsRequest()
